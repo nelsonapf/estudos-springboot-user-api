@@ -1,76 +1,68 @@
 package com.nelson.estudos.java.user_api.controller;
 
 import com.nelson.estudos.java.user_api.dto.UserDTO;
-import jakarta.annotation.PostConstruct;
+import com.nelson.estudos.java.user_api.service.UserService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("/user")
+@RequiredArgsConstructor
 public class UserController {
 
-    public static List<UserDTO> usuarios = new ArrayList<UserDTO>();
-
-    @PostConstruct
-    public void inicializaLista() {
-        UserDTO userDTO = new UserDTO();
-        userDTO.setNome("Nelson");
-        userDTO.setCpf("12345678");
-        userDTO.setEndereco("Rua Maria Alice");
-        userDTO.setEmail("nelson@nelson.nelson");
-        userDTO.setTelefone("5555-5555");
-        userDTO.setDataCadastro(LocalDateTime.now());
-
-        UserDTO userDTO2 = new UserDTO();
-        userDTO2.setNome("Ericka");
-        userDTO2.setCpf("987654432");
-        userDTO2.setEndereco("Rua Maria Alice");
-        userDTO2.setEmail("ericka@ericka.ericka");
-        userDTO2.setTelefone("5555-66666");
-        userDTO2.setDataCadastro(LocalDateTime.now());
-
-        UserDTO userDTO3 = new UserDTO();
-        userDTO3.setNome("Amazonka");
-        userDTO3.setCpf("99999999");
-        userDTO3.setEndereco("Rua Maria Alice");
-        userDTO3.setEmail("amazonka@amazonka.amazonka");
-        userDTO3.setTelefone("5555-8888");
-        userDTO3.setDataCadastro(LocalDateTime.now());
-
-        usuarios.add(userDTO);
-        usuarios.add(userDTO2);
-        usuarios.add(userDTO3);
-
-    }
+    public final UserService userService;
 
     @GetMapping
     public List<UserDTO> getUsuarios() {
-        return usuarios;
-    }
-    @GetMapping("/{cpf}")
-    public UserDTO getUsuarioPorCpf (@PathVariable String cpf) {
-        return usuarios.stream()
-                .filter(u -> u.getCpf().equals(cpf))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Usuario nao encontrado."));
+        return userService.getAll();
     }
 
+    //################## BUSCA USUARIO POR ID VIA HTTP ##################
+    @GetMapping("/{id}")
+    public UserDTO findById (@PathVariable Long id) {
+        return userService.findById(id);
+    }
+
+    //################## BUSCA USUARIO POR CPF VIA HTTP ##################
+    @GetMapping("/{cpf}/cpf")
+    public UserDTO findByCpf (@PathVariable String cpf) {
+        return userService.findByCpf(cpf); //findByCpf(cpf, key)
+    }
+
+    //################## INSERE VIA HTTP COM JSON ##################
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public UserDTO inserir(@RequestBody @Valid UserDTO userDTO){
-        userDTO.setDataCadastro(LocalDateTime.now());
-        usuarios.add(userDTO);
-        return userDTO;
+    public UserDTO newUser(@RequestBody @Valid UserDTO userDTO){
+        return userService.save(userDTO);
     }
 
-    @DeleteMapping("/{cpf}")
-    public boolean deletar(@PathVariable String cpf){
-        return usuarios
-                .removeIf(u -> u.getCpf().equals(cpf));
+    //################## DELETA VIA REQUISICAO HTTP ##################
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable Long id) //throws UserNotFoundExeption
+    {
+        userService.delete(id);
+    }
+
+    //################## BUSCA POR NOME ##################
+    @GetMapping("/search")
+    public List<UserDTO> queryByName ( @RequestParam(name="nome", required = true) String nome) {
+        return userService.queryByName(nome);
+    }
+
+    //################## EDITA USUARIO ##################
+    @PatchMapping("/{id}")
+    public UserDTO editUser (@PathVariable Long id, @RequestBody UserDTO userDTO) {
+        return userService.editUser(id, userDTO);
+    }
+
+    @GetMapping("/pageable")
+    public Page<UserDTO> getUsersPage (Pageable pageable) {
+        return userService.getAllPage(pageable);
     }
 }
