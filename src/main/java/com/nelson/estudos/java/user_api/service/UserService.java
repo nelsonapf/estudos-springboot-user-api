@@ -1,5 +1,6 @@
 package com.nelson.estudos.java.user_api.service;
 
+import com.nelson.estudos.java.shopping_client.exception.UserNotFoundException;
 import com.nelson.estudos.java.user_api.dto.UserDTO;
 import com.nelson.estudos.java.user_api.model.User;
 import com.nelson.estudos.java.user_api.repository.UserRepository;
@@ -55,7 +56,7 @@ public class UserService {
         if (user != null) {
             return UserDTO.convert(user);
         }
-        return null;
+        throw new UserNotFoundException();
     }
 
     //################## BUSCA POR NOME ################################

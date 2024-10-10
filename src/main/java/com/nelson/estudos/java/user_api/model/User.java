@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
+@Entity(name="user")
 public class User {
 
     @Id
@@ -27,6 +27,7 @@ public class User {
     private String endereco;
     private String email;
     private String telefone;
+    private String key;
     private LocalDateTime dataCadastro;
 
     public static User convert(UserDTO userDTO) {
@@ -36,6 +37,7 @@ public class User {
         user.setCpf(userDTO.getCpf());
         user.setEmail(userDTO.getEmail());
         user.setTelefone(userDTO.getTelefone());
+        user.setKey(userDTO.getKey());
         user.setDataCadastro(userDTO.getDataCadastro());
         return user;
     }
